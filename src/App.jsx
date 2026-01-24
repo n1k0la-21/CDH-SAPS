@@ -601,7 +601,7 @@ const PSAPSCALC = () => {
                             className={`btn ${values.diag.bw ? "btn-accent" : "btn-warning"}`}
                             onClick={() => toggleDiag("bw")}
                         >
-                            GA or BW
+                            * GA or BW
                         </button>
 
                         <button
