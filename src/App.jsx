@@ -632,7 +632,7 @@ const PSAPSCALC = () => {
                     <br></br>
                     &nbsp;&nbsp;ECMO = Needed ECMO support within the first 24 hours since admission
                     <br></br>
-                    &nbsp;&nbsp;GA or BW = GA {">"}32 and {"<"}34 weeks or Birth weight {">"}1500 and {"<"}2000g
+                    &nbsp;&nbsp;GA or BW = gestational age {">"}32 and {"<"}34 weeks or birth weight {">"}1500 and {"<"}2000g
                     <br></br>
                     &nbsp;&nbsp;CPR = Needed CPR within the first 24 hours since admission
                     <br></br>
