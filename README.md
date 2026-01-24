@@ -1,8 +1,3 @@
-The p-SAPS III score is the updated and simplified version of p-SAPS II
-
-Authors:
-Irschik S, Veljkovic J, Golej J, Schlager G, Brandt JB, Krall C, et al. Pediatric Simplified Acute Physiology Score II: Establishment of a New, Repeatable Pediatric Mortality Risk Assessment Score. Frontiers in pediatrics. 2021;9:757-822.
-
 License
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
