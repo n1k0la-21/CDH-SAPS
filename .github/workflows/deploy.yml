@@ -5,6 +5,9 @@ on:
     branches:
       - main  # or master
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build  # <-- uses the correct base path
+        run: npm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
