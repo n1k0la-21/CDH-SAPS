@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 
-const ageGroups = [
-    { id: 0, label: "0-3mo" },
-    { id: 1, label: "3-12mo" },
-    { id: 2, label: "1-12y" },
-    { id: 3, label: "12-18y" },
-];
+
 
 //these save the fields for the respective age group sorted by id
 const rangeChecks = {
@@ -52,6 +47,7 @@ const thresholdVals = {
 };
 
 const PSAPSCALC = () => {
+    const [mode, setMode] = useState("mortality"); // "mortality" | "ecmo"
     // General state for numerical variables
     const [values, setValues] = useState({
         SpO_2: 0,
@@ -65,7 +61,12 @@ const PSAPSCALC = () => {
         temperature: 0,
         urinaryOutput: null,
         adType: null,
-        diag: null,
+        diag: {
+            ecmo: false,
+            bw: false,
+            cpr: false,
+            ino: false,
+        },
         heartRate: 0,
         bloodPressure: 0,
     });
@@ -90,15 +91,61 @@ const PSAPSCALC = () => {
 
     const [activeField, setActiveField] = useState(""); // "SpO_2" or "PaO_2"
 
-    const [selectedAge, setSelectedAge] = useState(null);
+    const [selectedAge] = useState(0);
 
     const handleValueChange = (key, value) => {
         setValues((prev) => ({ ...prev, [key]: value }));
     };
 
-    const handleAgeSelect = (ageId) => setSelectedAge(ageId);
+    const toggleDiag = (type) => {
+        setValues(prev => {
+            let newDiag = { ...prev.diag };
 
-    const totalScore = Object.values(values).reduce((acc, val) => acc + val, 0);
+            if (type === "other") {
+                newDiag = {
+                    ecmo: false,
+                    bw: false,
+                    cpr: false,
+                    ino: false,
+                };
+            }
+
+            if (type === "ecmo") {
+                newDiag.ecmo = !newDiag.ecmo;
+            }
+
+            if (type === "bw") {
+                newDiag.bw = !newDiag.bw;
+            }
+
+            if (type === "cpr") {
+                newDiag.cpr = !newDiag.cpr;
+            }
+
+            if (type === "ino") {
+                newDiag.ino = !newDiag.ino;
+            }
+
+            return {
+                ...prev,
+                diag: newDiag,
+            };
+        });
+    };
+
+    const diagScore =
+        (values.diag.ecmo ? 29 : 0) +
+        (values.diag.bw ? 8 : 0) +
+        (values.diag.cpr ? 29 : 0) +
+        (values.diag.ino ? 8 : 0);
+
+
+    const totalScore =
+        Object.entries(values).reduce((acc, [key, val]) => {
+            if (key === "diag") return acc;
+            return acc + (val ?? 0);
+        }, 0) + diagScore;
+
 
     // range based variables check
     const checkRange = (field, value, id) => {
@@ -145,6 +192,13 @@ const PSAPSCALC = () => {
             }));
         }
         else alert("please input a valid value");
+    };
+
+    const switchMode = (newMode) => {
+        setMode(newMode);
+        if (newMode === "ecmo") {
+            handleValueChange("diag", 0);
+        }
     };
 
     // thresholds
@@ -272,27 +326,32 @@ const PSAPSCALC = () => {
     return (
         <div className="flex justify-center items-center min-h-screen bg-green-200">
             <div className="w-full max-w-3xl p-6 space-y-4 bg-white shadow-lg rounded-2xl">
-            <h1 className="text-3xl font-bold text-center">p-SAPS III Calculator</h1><br></br>
-            <h2 className="text-xl font-bold">Age dependent Variables (select to reveal)</h2>
-            <div className="space-x-2">
-                <span className="mr-2 font-bold">Age:</span>
-                {ageGroups.map((age) => (
+            <h1 className="text-3xl font-bold text-center">CDH-SAPS Calculator</h1><br></br>
+                <div className="flex justify-center space-x-4 mb-4">
                     <button
-                        key={age.id}
-                        className={`btn ${selectedAge === age.id ? "btn-accent" : "btn-warning"}`}
-                        onClick={() => {handleAgeSelect(age.id);
-                        handleValueChange("heartRate", 0);
-                        handleValueChange("bloodPressure", 0);
-                        setInput(prev => ({ ...prev, heartRate: 0}));
-                        setInput(prev => ({ ...prev, bloodPressure: 0 }));}}
-                    >
-                        {age.label}
-                    </button>
-                ))}
-            </div>
+                        className={`btn ${
+                            mode === "mortality" ? "btn-accent" : "btn-warning"
+                        }`}
+                        onClick={() => switchMode("mortality")}
 
-            {selectedAge !== null && (
-                <>
+                    >
+                        Mortality
+                    </button>
+
+                    <button
+                        className={`btn ${
+                            mode === "ecmo" ? "btn-accent" : "btn-warning"
+                        }`}
+                        onClick={() => switchMode("ecmo")}
+                    >
+                        ECMO
+                    </button>
+                </div>
+
+                <h2 className="text-xl font-bold">Age dependent Variables</h2>
+
+
+
                     <div>
                         <span className="mr-2 font-bold">Heart Rate:</span>
                         <input
@@ -314,8 +373,6 @@ const PSAPSCALC = () => {
                         />
                         <span> ({values.bloodPressure} points)</span>
                     </div>
-                </>
-            )}
             <br></br>
 
             <h2 className="text-xl font-bold">Age independent Variables</h2>
@@ -502,42 +559,69 @@ const PSAPSCALC = () => {
             </div>
 
             <div>
-                <label className="font-bold">Type of admission:</label>
+                <label className="font-bold">Type of admission: Unscheduled / prenatally undiagnosed</label>
                 <div className="space-x-2">
                     <button
                         className={`btn ${values.adType === 8 ? "btn-accent" : "btn-warning"}`}
                         onClick={() => handleValueChange("adType", 8)}
                     >
-                        Unscheduled
+                        Yes
                     </button>
                     <button
                         className={`btn ${values.adType === 0 ? "btn-accent" : "btn-warning"}`}
                         onClick={() => handleValueChange("adType", 0)}
                     >
-                        Scheduled
+                        No
                     </button>
+
                     <span>({values.adType ?? 0} points)</span>
                 </div>
             </div>
 
-            <div>
-                <label className="font-bold">Primary diagnosis / reason for admission:</label>
-                <div className="space-x-2">
-                    <button
-                        className={`btn ${values.diag === 29 ? "btn-accent" : "btn-warning"}`}
-                        onClick={() => handleValueChange("diag", 29)}
-                    >
-                        * CPR / ICH / ECMO
-                    </button>
-                    <button
-                        className={`btn ${values.diag === 0 ? "btn-accent" : "btn-warning"}`}
-                        onClick={() => handleValueChange("diag", 0)}
-                    >
-                        Other
-                    </button>
-                    <span>({values.diag ?? 0} points)</span>
+                <div>
+                    <label className="font-bold">Primary diagnosis / reason for admission:</label>
+                    <div className="space-x-2">
+                        {mode === "mortality" && (
+                            <button
+                                className={`btn ${values.diag.ecmo ? "btn-accent" : "btn-warning"}`}
+                                onClick={() => toggleDiag("ecmo")}
+                            >
+                                * ECMO
+                            </button>
+                        )}
+
+                        <button
+                            className={`btn ${values.diag.cpr ? "btn-accent" : "btn-warning"}`}
+                            onClick={() => toggleDiag("cpr")}
+                        >
+                            * CPR
+                        </button>
+
+                        <button
+                            className={`btn ${values.diag.bw ? "btn-accent" : "btn-warning"}`}
+                            onClick={() => toggleDiag("bw")}
+                        >
+                            GA or BW
+                        </button>
+
+                        <button
+                            className={`btn ${values.diag.ino ? "btn-accent" : "btn-warning"}`}
+                            onClick={() => toggleDiag("ino")}
+                        >
+                            * iNO
+                        </button>
+
+                        <button
+                            className="btn btn-warning"
+                            onClick={() => toggleDiag("other")}
+                        >
+                            Other
+                        </button>
+
+                        <span>({diagScore} points)</span>
+                    </div>
                 </div>
-            </div>
+
 
                 <br></br>
                 <h2 className="fixed bottom-6 right-6 text-4xl font-extrabold bg-white shadow-2xl rounded-2xl px-6 py-4">
@@ -545,12 +629,15 @@ const PSAPSCALC = () => {
                 </h2>
                 <p className="text-m ">
                     *
-                    ICH = Intracranial hemorrhage in combination with coma
                     <br></br>
                     &nbsp;&nbsp;ECMO = Needed ECMO support within the first 24 hours since admission
+                    <br></br>
+                    &nbsp;&nbsp;GA or BW = GA {">"}32 and {"<"}34 weeks or Birth weight {">"}1500 and {"<"}2000g
+                    <br></br>
+                    &nbsp;&nbsp;CPR = Needed CPR within the first 24 hours since admission
+                    <br></br>
+                    &nbsp;&nbsp;iNO = Needed iNO within the first 24 hours since admission
                 </p>
-                <p className="text-s">P-SAPS III is the updated and simplified version of p-SAPS II<sup>1</sup>.</p>
-                <p className="text-s">1. Irschik S, Veljkovic J, Golej J, Schlager G, Brandt JB, Krall C, et al. Pediatric Simplified Acute Physiology Score II: Establishment of a New, Repeatable Pediatric Mortality Risk Assessment Score. Frontiers in pediatrics. 2021;9:757-822.</p>
             </div>
         </div>
     );
