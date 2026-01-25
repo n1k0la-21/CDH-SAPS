@@ -348,7 +348,7 @@ const PSAPSCALC = () => {
                     </button>
                 </div>
 
-                <h2 className="text-xl font-bold">Age dependent Variables</h2>
+                
 
 
 
@@ -375,7 +375,7 @@ const PSAPSCALC = () => {
                     </div>
             <br></br>
 
-            <h2 className="text-xl font-bold">Age independent Variables</h2>
+            
             <div className="space-y-4">
                 {/* FiO2 is always visible */}
                 <div>
