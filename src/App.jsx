@@ -204,12 +204,9 @@ const PSAPSCALC = () => {
     // thresholds
     const checkUpperBound = (field, value) => {
         value = value.trim();
-        if(value === ""){
-            setInput(prev => ({
-                ...prev,
-                [field]: value
-            }));
-            setValues(prev => ({...prev, [field]: value}));
+        if (value === "") {
+            setInput(prev => ({ ...prev, [field]: value }));
+            setValues(prev => ({ ...prev, [field]: 0 })); // ✅ always number
             return;
         }
         let input = NaN;
@@ -242,14 +239,12 @@ const PSAPSCALC = () => {
 
     const checkLowerBound = (field, value) => {
         value = value.trim();
-        if(value === ""){
-            setInput(prev => ({
-                ...prev,
-                [field]: value
-            }));
-            setValues(prev => ({...prev, [field]: 0}));
+        if (value === "") {
+            setInput(prev => ({ ...prev, [field]: value }));
+            setValues(prev => ({ ...prev, [field]: 0 }));
             return;
         }
+
         let input = NaN;
         input = Number(value);
         if(isNaN(input)){
