@@ -5,7 +5,7 @@ import React, { useState } from "react";
 //these save the fields for the respective age group sorted by id
 const rangeChecks = {
     heartRate: [
-        {min: 100, max: 185},
+        {min: 104, max: 185},
         {min: 95, max: 175},
         {min: 70, max: 145},
         {min: 50, max: 130},
@@ -25,24 +25,25 @@ const rangeVals = {
     sodium: [5,1],
     potassium: [3,3]
 };
+
 const thresholdChecks = {
     SpO_2: 148,
-    PaO_2: 100,
-    bilirubin: 5.9,
+    bilirubin: 4.9,
     wbcc: 2,
-    bun: 68,
+    bun: 51,
     serumBicarb: 15,
     temperature: 38.5,
+    gcs: 6
 };
 const thresholdVals = {
     SpO_2: 11,
-    PaO_2: 11,
     bilirubin: 9,
     wbcc: 12,
     bun: 10,
     serumBicarb: 6,
     temperature: 3,
     urinaryOutput: 11,
+    gcs: 26,
     diag: 29,
 };
 
@@ -51,7 +52,6 @@ const PSAPSCALC = () => {
     // General state for numerical variables
     const [values, setValues] = useState({
         SpO_2: 0,
-        PaO_2: 0,
         sodium: 0,
         potassium: 0,
         bilirubin: 0,
@@ -67,13 +67,13 @@ const PSAPSCALC = () => {
             cpr: false,
             ino: false,
         },
+        gcs: 0,
         heartRate: 0,
         bloodPressure: 0,
     });
     // user input values that show up onscreen
     const [input, setInput] = useState({
         SpO_2: 0,
-        PaO_2: 0,
         FiO_2: 0,
         sodium: 0,
         potassium: 0,
@@ -83,6 +83,7 @@ const PSAPSCALC = () => {
         serumBicarb: 0,
         temperature: 0,
         urinaryOutput: 0,
+        gcs: 0,
         adType: 0,
         diag: 0,
         heartRate: 0,
@@ -134,9 +135,9 @@ const PSAPSCALC = () => {
     };
 
     const diagScore =
-        (values.diag.ecmo ? 29 : 0) +
-        (values.diag.bw ? 8 : 0) +
-        (values.diag.cpr ? 29 : 0) +
+        (values.diag.ecmo ? 17 : 0) +
+        (values.diag.bw ? 9 : 0) +
+        (values.diag.cpr ? 17 : 0) +
         (values.diag.ino ? 8 : 0);
 
 
@@ -372,89 +373,64 @@ const PSAPSCALC = () => {
 
             
             <div className="space-y-4">
-                {/* FiO2 is always visible */}
+
+                {/* SpO2 */}
+                <div>
+                    <span className="mr-2 font-medium">SpO₂:</span>
+                    <input
+                        type="text"
+                        value={input.SpO_2}
+                        onChange={(e) => {
+                            const value = e.target.value.trim();
+
+                            if (value !== "" && isNaN(Number(value))) {
+                                alert("Please input a valid value");
+                                return;
+                            }
+
+                            setInput(prev => ({ ...prev, SpO_2: value }));
+
+                            // compute ratio immediately
+                            checkRatio("SpO_2", value);
+                        }}
+                        className="input input-bordered"
+                    />
+                </div>
+
+                {/* FiO2 */}
                 <div>
                     <span className="mr-2 font-medium">FiO₂:</span>
                     <input
                         type="text"
                         value={input.FiO_2}
                         onChange={(e) => {
-                            const value = e.target.value.trim(); // remove spaces
+                            const value = e.target.value.trim();
 
-                            // Only alert if it's not empty and not a number
                             if (value !== "" && isNaN(Number(value))) {
                                 alert("Please input a valid value");
-                            } else {
-                                setInput(prev => ({ ...prev, FiO_2: value }));
+                                return;
                             }
 
-                            if(activeField === "SpO_2"){
-                                checkRatio("SpO_2", input.SpO_2);
-                            }
-                            if(activeField === "PaO_2"){
-                                checkRatio("PaO_2", input.PaO_2);
-                            }
+                            setInput(prev => ({ ...prev, FiO_2: value }));
+
+                            // recompute ratio when FiO2 changes
+                            checkRatio("SpO_2", input.SpO_2);
                         }}
                         className="input input-bordered"
                     />
                 </div>
 
-                {/* Checkboxes to toggle ratio input */}
-                <div className="flex space-x-4">
-                    <label>
-                        SpO₂/FiO₂
-                        <input
-                            type="checkbox"
-                            checked={activeField === "SpO_2"}
-                            onChange={() =>
-                                setActiveField((prev) => (prev === "SpO_2" ? "" : "SpO_2"))
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        PaO₂/FiO₂
-                        <input
-                            type="checkbox"
-                            checked={activeField === "PaO_2"}
-                            onChange={() =>
-                                setActiveField((prev) => (prev === "PaO_2" ? "" : "PaO_2"))
-                            }
-                        />
-                    </label>
+                {/* Ratio display */}
+                <div>
+                    <span className="font-bold">
+                        SpO₂ / FiO₂:{" "}
+                        {isNaN(input.SpO_2 / input.FiO_2)
+                            ? "-"
+                            : (input.SpO_2 / input.FiO_2).toFixed(2)}
+                    </span>
+                    <span> ({values.SpO_2} points)</span>
                 </div>
 
-                {/* Conditional input fields */}
-                {activeField === "SpO_2" && (
-                    <div>
-                        <span className="mr-2 font-medium">SpO₂:</span>
-                        <input
-                            type="text"
-                            value={input.SpO_2}
-                            onChange={(e) => {checkRatio("SpO_2", e.target.value)}}
-                            className="input input-bordered"
-                        /><br></br>
-                        <span className="text-l font-bold">SpO₂/FiO₂: {isNaN(input.SpO_2/input.FiO_2) ? "-": input.SpO_2/input.FiO_2} </span>
-                        <span> ({values.SpO_2} points)</span>
-                    </div>
-                )}
-
-                {activeField === "PaO_2" && (
-                    <div>
-                        <span className="mr-2 font-medium">PaO₂:</span>
-                        <input
-                            type="text"
-                            value={input.PaO_2}
-                            onChange={(e) => {
-                                checkRatio("PaO_2", e.target.value);
-                            }
-                            }
-                            className="input input-bordered"
-                        /><br></br>
-                        <span className="text-l font-bold">PaO₂/FiO₂: {isNaN(input.PaO_2/input.FiO_2) ? "-": input.PaO_2/input.FiO_2} </span>
-                        <span> ({values.PaO_2} points)</span>
-                    </div>
-                )}
             </div>
 
             <div>
@@ -480,7 +456,7 @@ const PSAPSCALC = () => {
             </div>
 
             <div>
-                <span className="mr-2 font-bold">Bilirubin (mg/dL):</span>
+                <span className="mr-2 font-bold">Conjugated Bilirubin (mg/dL):</span>
                 <input
                     type="text"
                     value={input.bilirubin}
@@ -502,7 +478,7 @@ const PSAPSCALC = () => {
             </div>
 
             <div>
-                <span className="mr-2 font-bold">BUN (mg/dl):</span>
+                <span className="mr-2 font-bold">Blood Urea Nitrogen (mg/dl):</span>
                 <input
                     type="text"
                     value={input.bun}
@@ -513,7 +489,7 @@ const PSAPSCALC = () => {
             </div>
 
             <div>
-                <span className="mr-2 font-bold">Serum bicarbonate (mEqu/L):</span>
+                <span className="mr-2 font-bold">Serum Bicarbonate (mEqu/L):</span>
                 <input
                     type="text"
                     value={input.serumBicarb}
@@ -529,6 +505,16 @@ const PSAPSCALC = () => {
                     type="text"
                     value={input.temperature}
                     onChange={(e) => checkUpperBound("temperature", e.target.value)}
+                    className="input input-bordered"
+                />
+                <span> ({values.temperature} points)</span>
+            </div>
+            <div>
+                <span className="mr-2 font-bold">Glasgow Coma Scale:</span>
+                <input
+                    type="text"
+                    value={input.temperature}
+                    onChange={(e) => checkUpperBound("gcs", e.target.value)}
                     className="input input-bordered"
                 />
                 <span> ({values.temperature} points)</span>
@@ -574,7 +560,7 @@ const PSAPSCALC = () => {
             </div>
 
                 <div>
-                    <label className="font-bold">Primary diagnosis / reason for admission:</label>
+                    <label className="font-bold">Reasons for admission:</label>
                     <div className="space-x-2">
                         {mode === "mortality" && (
                             <button
@@ -591,14 +577,14 @@ const PSAPSCALC = () => {
                         >
                             * CPR
                         </button>
-
-                        <button
-                            className={`btn ${values.diag.bw ? "btn-accent" : "btn-warning"}`}
-                            onClick={() => toggleDiag("bw")}
-                        >
-                            * GA or BW
-                        </button>
-
+                        {mode === "mortality" && (
+                            <button
+                                className={`btn ${values.diag.bw ? "btn-accent" : "btn-warning"}`}
+                                onClick={() => toggleDiag("bw")}
+                            >
+                                * GA or BW
+                            </button>
+                        )
                         <button
                             className={`btn ${values.diag.ino ? "btn-accent" : "btn-warning"}`}
                             onClick={() => toggleDiag("ino")}
