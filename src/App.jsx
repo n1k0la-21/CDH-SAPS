@@ -584,7 +584,7 @@ const PSAPSCALC = () => {
                             >
                                 * GA or BW
                             </button>
-                        )
+                        )}
                         <button
                             className={`btn ${values.diag.ino ? "btn-accent" : "btn-warning"}`}
                             onClick={() => toggleDiag("ino")}
