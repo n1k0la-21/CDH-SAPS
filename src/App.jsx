@@ -274,34 +274,25 @@ const PSAPSCALC = () => {
         }
     };
 
-    const checkRatio = (field, value) => {
-        // Trim spaces
-        value = value.trim();
+    const checkRatio = (spo2, fio2) => {
+    if (spo2 === "" || fio2 === "") {
+        setValues(prev => ({ ...prev, SpO_2: 0 }));
+        return;
+    }
 
-        if (value === "") {
-            setInput(prev => ({ ...prev, [field]: value }));
-            setValues(prev => ({...prev, [field]: 0}));
-            return;
-        }
+    const s = Number(spo2);
+    const f = Number(fio2);
 
-        // Only allow numbers (integer or decimal)
-        if (!/^\d*\.?\d*$/.test(value)) {
-            alert("Please input a valid numeric value");
-            return;
-        }
+    if (isNaN(s) || isNaN(f) || f === 0) return;
 
-        value = Number(value);
-        if (isNaN(value)) {
-            alert("Please input a valid numeric value");
-            return;
-        }
+    const ratio = s / f;
 
-        // Prevent division by zero if FiO2 is empty or zero
-        const FiO2 = Number(input.FiO_2);
-        if (!FiO2 || FiO2 === 0) {
-            setInput(prev => ({ ...prev, [field]: value }));
-            return;
-        }
+    if (ratio < thresholdChecks.SpO_2) {
+        setValues(prev => ({ ...prev, SpO_2: thresholdVals.SpO_2 }));
+    } else {
+        setValues(prev => ({ ...prev, SpO_2: 0 }));
+    }
+};
 
         const ratio = value / FiO2;
         const bound = thresholdChecks[field];
@@ -381,18 +372,21 @@ const PSAPSCALC = () => {
                         type="text"
                         value={input.SpO_2}
                         onChange={(e) => {
-                            const value = e.target.value.trim();
+    const value = e.target.value.trim();
 
-                            if (value !== "" && isNaN(Number(value))) {
-                                alert("Please input a valid value");
-                                return;
-                            }
+    if (value !== "" && isNaN(Number(value))) {
+        alert("Please input a valid value");
+        return;
+    }
 
-                            setInput(prev => ({ ...prev, SpO_2: value }));
+    setInput(prev => {
+        const updated = { ...prev, SpO_2: value };
 
-                            // compute ratio immediately
-                            checkRatio("SpO_2", value);
-                        }}
+        checkRatio(updated.SpO_2, updated.FiO_2); // ✅ always fresh
+
+        return updated;
+    });
+}}
                         className="input input-bordered"
                     />
                 </div>
@@ -404,18 +398,21 @@ const PSAPSCALC = () => {
                         type="text"
                         value={input.FiO_2}
                         onChange={(e) => {
-                            const value = e.target.value.trim();
+    const value = e.target.value.trim();
 
-                            if (value !== "" && isNaN(Number(value))) {
-                                alert("Please input a valid value");
-                                return;
-                            }
+    if (value !== "" && isNaN(Number(value))) {
+        alert("Please input a valid value");
+        return;
+    }
 
-                            setInput(prev => ({ ...prev, FiO_2: value }));
+    setInput(prev => {
+        const updated = { ...prev, FiO_2: value };
 
-                            // recompute ratio when FiO2 changes
-                            checkRatio("SpO_2", input.SpO_2);
-                        }}
+        checkRatio(updated.SpO_2, updated.FiO_2); // ✅ always fresh
+
+        return updated;
+    });
+}}
                         className="input input-bordered"
                     />
                 </div>
