@@ -498,7 +498,7 @@ const checkRatio = (spo2, fio2) => {
                 <input
                     type="text"
                     value={input.gcs}
-                    onChange={(e) => checkUpperBound("gcs", e.target.value)}
+                    onChange={(e) => checkLowerBound("gcs", e.target.value)}
                     className="input input-bordered"
                 />
                 <span> ({values.gcs} points)</span>
