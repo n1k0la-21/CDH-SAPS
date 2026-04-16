@@ -17,7 +17,7 @@ const rangeChecks = {
         {min: 55, max: 130},
     ],
     sodium: {min: 133, max: 145},
-    potassium: {min: 3.5, max: 6.2},
+    potassium: {min: 3.5, max: 6},
 };
 const rangeVals = {
     heartRate: [11, 7],
