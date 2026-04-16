@@ -510,11 +510,11 @@ const PSAPSCALC = () => {
                 <span className="mr-2 font-bold">Glasgow Coma Scale:</span>
                 <input
                     type="text"
-                    value={input.temperature}
+                    value={input.gcs}
                     onChange={(e) => checkUpperBound("gcs", e.target.value)}
                     className="input input-bordered"
                 />
-                <span> ({values.temperature} points)</span>
+                <span> ({values.gcs} points)</span>
             </div>
                 <br></br>
                 <div>
