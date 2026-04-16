@@ -595,13 +595,13 @@ const checkRatio = (spo2, fio2) => {
                 <p className="text-m ">
                     *
                     <br></br>
-                    &nbsp;&nbsp;ECMO = Needed ECMO support within the first 24 hours since admission
+                    &nbsp;&nbsp;ECMO = Necessity of ECMO support within the first 24 hours since admission
                     <br></br>
                     &nbsp;&nbsp;GA or BW = gestational age {">"}32 and {"<"}34 weeks or birth weight {">"}1500 and {"<"}2000g
                     <br></br>
-                    &nbsp;&nbsp;CPR = Needed CPR within the first 24 hours since admission
+                    &nbsp;&nbsp;CPR = Necessity of CPR within the first 24 hours since admission
                     <br></br>
-                    &nbsp;&nbsp;iNO = Needed iNO within the first 24 hours since admission
+                    &nbsp;&nbsp;iNO = Necessity of iNO within the first 24 hours since admission
                 </p>
             </div>
         </div>
