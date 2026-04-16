@@ -274,7 +274,7 @@ const PSAPSCALC = () => {
         }
     };
 
-    const checkRatio = (spo2, fio2) => {
+const checkRatio = (spo2, fio2) => {
     if (spo2 === "" || fio2 === "") {
         setValues(prev => ({ ...prev, SpO_2: 0 }));
         return;
@@ -294,19 +294,6 @@ const PSAPSCALC = () => {
     }
 };
 
-        const ratio = value / FiO2;
-        const bound = thresholdChecks[field];
-        if (!bound) return;
-
-        if (ratio < bound) {
-            setValues(prev => ({ ...prev, [field]: thresholdVals[field] }));
-        }
-        else{
-            setValues(prev => ({ ...prev, [field]: 0 }));
-        }
-
-        setInput(prev => ({ ...prev, [field]: value }));
-    };
 
 
 
